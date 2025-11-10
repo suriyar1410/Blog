@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../Api"; 
 import React, { useState } from "react";
 
 export default function AddPost() {
@@ -15,11 +15,16 @@ export default function AddPost() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    axios.post("http://localhost:5000/api/posts/",formData)
-    console.log("Form Submitted:", formData);
-    alert("Post submitted!");
+    try {
+      const response = await api.post("/posts", formData); 
+      console.log("Post submitted:", response.data);
+      alert("Post submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting post:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (

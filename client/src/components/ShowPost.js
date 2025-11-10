@@ -1,4 +1,4 @@
-import axios from 'axios'
+import api from '../Api'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -8,13 +8,13 @@ function ShowPost() {
   const { id } = useParams()
   const [post, setPost] = useState(null)
 
-  useEffect(() => {
+   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/posts/${id}`)
+        const { data } = await api.get(`/posts/${id}`)
         setPost(data)
       } catch (error) {
-        console.error(error)
+        console.error('Error fetching post:', error)
       }
     }
     fetchData()
