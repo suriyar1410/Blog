@@ -10,10 +10,15 @@ const app=express()
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(String(process.env.MONOGODB_URI))
-.then(()=>{console.log('Database connected...')})
-.then(()=>{app.listen(process.env.PORT,()=>{console.log("server start...")})})
-.catch((err)=>{console.log(err)})
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log(' Database connected...');
+    app.listen(process.env.PORT, () => {
+      console.log(' Server started on port', process.env.PORT);
+    });
+  })
+  .catch((err) => console.error('Database connection error:', err));
+
 
 app.use('/api/posts',postroutes)
 app.use('/api/category',categoryroutes)
