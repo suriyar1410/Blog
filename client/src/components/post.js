@@ -9,10 +9,12 @@ const BlogPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { data } = await api.get("/posts");
+        const { data } = await api.get("/api/posts");
         setPosts(data);
         const uniqueCategories = [];
         const map = {};
@@ -30,7 +32,7 @@ const BlogPage = () => {
     fetchPosts();
   }, []);
 
-  const filteredPosts = selectedCategory === "All" ? posts  : posts.filter((p) => p.category?.name === selectedCategory);
+  const filteredPosts = selectedCategory === "All" ? posts : posts.filter((p) => p.category?.name === selectedCategory);
 
   return (
     <div className="blog-page bg-light min-vh-100">
@@ -40,36 +42,50 @@ const BlogPage = () => {
           <p className="text-muted">Read the latest posts and insights</p>
         </div>
 
+        <div className="text-end mb-4">
+          {user ? ( <h5 className="text-success">Welcome, {user.name} 👋</h5> ) : (
+            <Link to="/login" className="btn btn-danger"> Login to Create Post</Link>)}
+        </div>
+
         <div className="row g-4">
           <div className="col-lg-8">
             {filteredPosts.length === 0 ? (
               <div className="text-center py-5">
                 <h5 className="text-muted">No posts available.</h5>
-              </div>
-            ) : (
-              filteredPosts.map((post) => (
-                <div className="card shadow-sm mb-4 border-0 hover-shadow"key={post._id}>
+              </div>) : ( filteredPosts.map((post) => (
+                <div
+                  className="card shadow-sm mb-4 border-0 hover-shadow"
+                  key={post._id}
+                >
                   {post.image && (
-                    <img
-                      src={post.image} className="card-img-top" alt={post.title}
-                      style={{
-                        objectFit: "cover",
+                  <img
+                      src={post.image}
+                      className="card-img-top"
+                      alt={post.title}
+                      style={{ objectFit: "cover",
                         height: "320px",
                         borderTopLeftRadius: "0.5rem",
                         borderTopRightRadius: "0.5rem",
                       }}
                     />
                   )}
+
                   <div className="card-body">
                     <h4 className="card-title">{post.title}</h4>
-                    <p className="card-text text-secondary"> {post.content.length > 200 ? post.content.slice(0, 200) + "..."  : post.content}</p>
+                    <p className="card-text text-secondary">
+                      {post.content.length > 200
+                        ? post.content.slice(0, 200) + "..."
+                        : post.content}
+                    </p>
+
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="badge bg-danger">
-                        {post.category?.name || "Uncategorized"}  </span>
-                      <Link to={`/ShowPost/${post._id}`}
-                        className="btn btn-outline-danger btn-sm" > Read More </Link>
+                        {post.category?.name || "Uncategorized"}</span>
+
+                      <Link  to={`/ShowPost/${post._id}`} className="btn btn-outline-danger btn-sm">Read More</Link>
                     </div>
                   </div>
+
                   <div className="card-footer bg-white border-0 text-muted small">
                     Posted on{" "}
                     {new Date(post.createdAt).toLocaleDateString()} by{" "}
@@ -80,16 +96,34 @@ const BlogPage = () => {
             )}
           </div>
 
-          {/* Sidebar (now col-lg-4) */}
           <div className="col-lg-4">
             <div className="card shadow-sm border-0 mb-4">
-              <div className="card-header bg-danger text-white fw-semibold"> Categories </div>
+              <div className="card-header bg-danger text-white fw-semibold">
+                Categories
+              </div>
+
               <ul className="list-group list-group-flush">
-                <li className={`list-group-item category-item ${ selectedCategory === "All" ? "active-category" : "" }`}
-                  style={{ cursor: "pointer" }} onClick={() => setSelectedCategory("All")}  > All </li>
-                {categories.map((cat) => (  <li key={cat._id} className={`list-group-item category-item ${
-                      selectedCategory === cat.name ? "active-category" : "" }`} style={{ cursor: "pointer" }}
-                    onClick={() => setSelectedCategory(cat.name)} > {cat.name} </li>
+                <li
+                  className={`list-group-item category-item ${
+                    selectedCategory === "All" ? "active-category" : ""
+                  }`}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setSelectedCategory("All")}
+                >
+                  All
+                </li>
+
+                {categories.map((cat) => (
+                  <li
+                    key={cat._id}
+                    className={`list-group-item category-item ${
+                      selectedCategory === cat.name ? "active-category" : ""
+                    }`}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setSelectedCategory(cat.name)}
+                  >
+                    {cat.name}
+                  </li>
                 ))}
               </ul>
             </div>

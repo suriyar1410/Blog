@@ -1,12 +1,26 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import '../App.css'
+import { Link, useNavigate } from "react-router-dom";
+import "../App.css";
+import api from "../Api";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await api.post("api/auth/login", { email, password });
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("username", res.data.user.name);
+      alert("Login successful!");
+      navigate("/AddPost");
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Invalid credentials");
+    }
   };
 
   return (
@@ -21,6 +35,8 @@ const Login = () => {
               type="email"
               className="form-control"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -31,6 +47,8 @@ const Login = () => {
               type={showPassword ? "text" : "password"}
               className="form-control"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
             <i
@@ -53,14 +71,10 @@ const Login = () => {
                 Remember me
               </label>
             </div>
-            <Link to="/forgot-password" className="small text-primary">
-              Forgot password?
-            </Link>
           </div>
-
-          <Link to='/' type="submit" className="btn btn-primary w-100">
+          <button type="submit" className="btn btn-primary w-100">
             Login
-          </Link>
+          </button>
         </form>
 
         <hr className="my-4" />

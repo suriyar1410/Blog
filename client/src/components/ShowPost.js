@@ -11,7 +11,7 @@ function ShowPost() {
    useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await api.get(`/posts/${id}`)
+        const { data } = await api.get(`api/posts/${id}`)
         setPost(data)
       } catch (error) {
         console.error('Error fetching post:', error)

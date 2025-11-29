@@ -1,6 +1,5 @@
 const Category = require('../Models/category.js'); 
 
-// Get all categories
 const getAllcategory = async (req, res) => {
   try {
     const categories = await Category.find();
@@ -13,7 +12,6 @@ const getAllcategory = async (req, res) => {
   }
 };
 
-// Get a single category by ID
 const Singlecategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
@@ -26,7 +24,6 @@ const Singlecategory = async (req, res) => {
   }
 };
 
-// Create a new category
 const Createcategory = async (req, res) => {
   try {
     const newCategory = new Category({
@@ -42,19 +39,16 @@ const Createcategory = async (req, res) => {
   }
 };
 
-// Update an existing category
 const Updatecategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) {
       return res.status(404).json({ message: "No category found with this ID" });
     }
-
     category.name = req.body.name || category.name;
     category.slug = req.body.slug || category.slug;
     category.description = req.body.description || category.description;
     category.updatedAt = Date.now();
-
     const updatedCategory = await category.save();
     res.status(200).json(updatedCategory);
   } catch (error) {
@@ -62,14 +56,12 @@ const Updatecategory = async (req, res) => {
   }
 };
 
-// Delete a category
 const Deletecategory = async (req, res) => {
   try {
     const category = await Category.findById(getPostsByCategoryId);
     if (!category) {
       return res.status(404).json({ message: "No category found with this ID" });
     }
-
     await Category.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Category deleted successfully" });
   } catch (error) {

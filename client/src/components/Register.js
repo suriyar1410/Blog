@@ -1,12 +1,30 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../Api";
 
 const Register = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      await api.post("api/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      alert("Registration successful! Please login.");
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("Registration failed!");
+    }
   };
 
   return (
@@ -21,6 +39,8 @@ const Register = () => {
               type="text"
               className="form-control"
               placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
@@ -31,6 +51,8 @@ const Register = () => {
               type="email"
               className="form-control"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -41,25 +63,15 @@ const Register = () => {
               type={showPassword ? "text" : "password"}
               className="form-control"
               placeholder="Create a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
             <i
-              className={`bi ${
-                showPassword ? "bi-eye" : "bi-eye-slash"
-              } position-absolute top-50 end-0 translate-middle-y me-3 text-muted`}
+              className={`bi ${showPassword ? "bi-eye" : "bi-eye-slash"} position-absolute top-50 end-0 translate-middle-y me-3 text-muted`}
               role="button"
               onClick={() => setShowPassword(!showPassword)}
             ></i>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Confirm Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Re-enter your password"
-              required
-            />
           </div>
 
           <button type="submit" className="btn btn-success w-100">

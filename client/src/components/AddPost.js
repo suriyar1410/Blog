@@ -1,5 +1,6 @@
 import api from "../Api"; 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 export default function AddPost() {
   const [formData, setFormData] = useState({
@@ -10,6 +11,32 @@ export default function AddPost() {
     image: "",
   });
 
+  const [categories, setCategories] = useState([]);
+
+  const isLoggedIn = !!localStorage.getItem("token");
+
+useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const { data } = await api.get("api/category");
+      setCategories(data);
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  };
+  fetchCategories();
+}, []);
+
+  useEffect(() => {
+    const username = localStorage.getItem("username");
+    if (username) {
+      setFormData((prev) => ({ ...prev, author: username }));
+    }
+    api.get("api/category")
+      .then((res) => setCategories(res.data))
+      .catch((err) => console.error("Category load error:", err));
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -18,92 +45,60 @@ export default function AddPost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/posts", formData); 
-      console.log("Post submitted:", response.data);
+      const token = localStorage.getItem("token");
+      const response = await api.post("api/posts", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       alert("Post submitted successfully!");
+      console.log("Post submitted:", response.data);
     } catch (error) {
       console.error("Error submitting post:", error);
-      alert("Something went wrong. Please try again.");
+      alert("Something went wrong.");
     }
   };
 
   return (
     <div className="container col-lg-4 mt-5">
+      {!isLoggedIn && (
+        <div className="text-center mb-3">
+          <Link to="/login" className="btn btn-outline-primary"> Login to Post </Link>
+        </div>
+      )}
+
       <div className="card shadow p-4">
         <h2 className="text-center mb-4">Create New Post</h2>
-
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="title" className="form-label">Post Title</label>
-            <input
-              type="text"
-              className="form-control"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Enter Post Title"
-              required
-            />
+            <label className="form-label">Post Title</label>
+            <input type="text" className="form-control"name="title" value={formData.title} onChange={handleChange} required/>
           </div>
 
           <div className="mb-3">
-            <label htmlFor="content" className="form-label">Content</label>
-            <textarea
-              className="form-control"
-              id="content"
-              name="content"
-              value={formData.content}
-              onChange={handleChange}
-              rows="4"
-              placeholder="Enter Post Content"
-              required
-            ></textarea>
+            <label className="form-label">Content</label>
+            <textarea className="form-control"rows="4" name="content" value={formData.content}onChange={handleChange} required ></textarea>
           </div>
 
+ <div className="mb-3">
+  <label className="form-label">Category</label>
+  <select className="form-control"name="category" value={formData.category} onChange={handleChange}required>
+    <option value="">Select Category</option>
+    {categories.map((cat) => (<option key={cat._id} value={cat._id}>{cat.name}</option> ))}
+  </select>
+</div>
           <div className="mb-3">
-            <label htmlFor="category" className="form-label">Category</label>
-            <input
-              type="text"
-              className="form-control"
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              placeholder="Enter Category"
-              required
-            />
+            <label className="form-label">Author</label>
+            <input type="text"className="form-control" name="author" value={formData.author} readOnly required/>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Image URL</label>
+            <input type="text"  className="form-control" name="image" value={formData.image} onChange={handleChange}/>
+          </div>
+          <div className="d-flex justify-content-center">
+            <button type="submit" className="btn btn-primary"> Submit Post</button>
           </div>
 
-          <div className="mb-3">
-            <label htmlFor="author" className="form-label">Author</label>
-            <input type="text" className="form-control" id="author"
-              name="author"
-              value={formData.author}
-              onChange={handleChange}
-              placeholder="Enter Author Name"
-              required
-            />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="image" className="form-label">Image URL (optional)</label>
-            <input
-              type="text"
-              className="form-control"
-              id="image"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="Enter Image URL"
-            />
-          </div>
-             <div className="d-flex justify-content-center">
-              <button type="submit" className="btn btn-primary ">
-            Submit Post
-          </button>
-        </div>
-      
         </form>
       </div>
     </div>
